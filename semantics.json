@@ -41,6 +41,7 @@
     "name": "text",
     "type": "text",
     "widget": "html",
+    "optional": true,
     "default": "Fill in the missing words",
     "description": "A guide telling the user how to answer this task.",
     "enterMode": "p",
@@ -261,6 +262,14 @@
     "description": "These options will let you control how the task behaves.",
     "optional": true,
     "fields": [
+      {
+        "label": "Render blank as dropdown list",
+        "importance": "low",
+        "name": "renderDropdown",
+        "type": "boolean",
+        "default": false,
+        "optional": true
+      },
       {
         "label": "Enable \"Retry\"",
         "importance": "low",

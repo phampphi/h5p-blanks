@@ -75,6 +75,7 @@ H5P.Blanks = (function ($, Question) {
       tipLabel: "Tip",
       scoreBarLabel: 'You got :num out of :total points',
       behaviour: {
+        renderDropdown: false,
         enableRetry: true,
         enableSolutionsButton: true,
         enableCheckButton: true,
@@ -297,14 +298,17 @@ H5P.Blanks = (function ($, Question) {
         // Create new cloze
         clozeNumber += 1;
         var defaultUserAnswer = (self.params.userAnswers.length > self.clozes.length ? self.params.userAnswers[self.clozes.length] : null);
-        var cloze = new Blanks.Cloze(solution, self.params.behaviour, defaultUserAnswer, {
+        var l10n = {
           answeredCorrectly: self.params.answeredCorrectly,
           answeredIncorrectly: self.params.answeredIncorrectly,
           solutionLabel: self.params.solutionLabel,
           inputLabel: self.params.inputLabel,
           inputHasTipLabel: self.params.inputHasTipLabel,
           tipLabel: self.params.tipLabel
-        });
+        };
+        var cloze = self.params.behaviour.renderDropdown 
+          ? new Blanks.Dropdown(solution, self.params.behaviour, defaultUserAnswer, l10n) 
+          : new Blanks.TextInput(solution, self.params.behaviour, defaultUserAnswer, l10n);
 
         self.clozes.push(cloze);
         return cloze;
@@ -322,7 +326,7 @@ H5P.Blanks = (function ($, Question) {
     self.$questions[0].insertBefore(self.a11yHeader, this.$questions[0].childNodes[0] || null);
 
     // Set input fields.
-    this.$questions.find('input').each(function (i) {
+    this.$questions.find(self.params.behaviour.renderDropdown ? 'select' : 'input').each(function (i) {
       var afterCheck;
       if (self.params.behaviour.autoCheck) {
         afterCheck = function () {
@@ -915,7 +919,7 @@ H5P.Blanks = (function ($, Question) {
    * modification of wrong answers.
    */
   Blanks.prototype.disableInput = function () {
-    this.$questions.find('input').attr('disabled', true);
+    this.$questions.find(this.params.behaviour.renderDropdown ? 'select' : 'input').attr('disabled', true);
   };
 
   Blanks.idCounter = 0;

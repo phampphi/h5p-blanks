@@ -4,7 +4,7 @@
   "machineName": "H5P.Blanks",
   "majorVersion": 1,
   "minorVersion": 12,
-  "patchVersion": 10,
+  "patchVersion": 13,
   "runnable": 1,
   "license": "MIT",
   "author": "Joubel",
@@ -26,6 +26,9 @@
     },
     {
       "path": "js/cloze.js"
+    },
+    {
+      "path": "js/cloze_dropdown.js"
     }
   ],
   "preloadedDependencies": [

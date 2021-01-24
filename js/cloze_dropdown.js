@@ -14,9 +14,9 @@
    * @param {string} l10n.inputHasTipLabel Assistive technology label for input with tip
    * @param {string} l10n.tipLabel Label for tip icon
    */
-  Blanks.TextInput = function (solution, behaviour, defaultUserAnswer, l10n) {
+  Blanks.Dropdown = function (solution, behaviour, defaultUserAnswer, l10n) {
     var self = this;
-    var $input, $wrapper;
+    var $select, $wrapper;
     var answers = solution.solutions;
     var answer = answers.join('/');
     var tip = solution.tip;
@@ -40,26 +40,26 @@
       if (behaviour.caseSensitive !== true) {
         answered = answered.toLowerCase();
       }
-      for (var i = 0; i < answers.length; i++) {
+      // for (var i = 0; i < answers.length; i++) {
         // Damerau-Levenshtein comparison
-        if (behaviour.acceptSpellingErrors === true) {
-          var levenshtein = H5P.TextUtilities.computeLevenshteinDistance(answered, answers[i], true);
-          /*
-           * The correctness is temporarily computed by word length and number of number of operations
-           * required to change one word into the other (Damerau-Levenshtein). It's subject to
-           * change, cmp. https://github.com/otacke/udacity-machine-learning-engineer/blob/master/submissions/capstone_proposals/h5p_fuzzy_blanks.md
-           */
-          if ((answers[i].length > 9) && (levenshtein <= 2)) {
-            return true;
-          } else if ((answers[i].length > 3) && (levenshtein <= 1)) {
-            return true;
-          }
-        }
+        // if (behaviour.acceptSpellingErrors === true) {
+        //   var levenshtein = H5P.TextUtilities.computeLevenshteinDistance(answered, answers[i], true);
+        //   /*
+        //    * The correctness is temporarily computed by word length and number of number of operations
+        //    * required to change one word into the other (Damerau-Levenshtein). It's subject to
+        //    * change, cmp. https://github.com/otacke/udacity-machine-learning-engineer/blob/master/submissions/capstone_proposals/h5p_fuzzy_blanks.md
+        //    */
+        //   if ((answers[i].length > 9) && (levenshtein <= 2)) {
+        //     return true;
+        //   } else if ((answers[i].length > 3) && (levenshtein <= 1)) {
+        //     return true;
+        //   }
+        // }
         // regular comparison
-        if (answered === answers[i]) {
+        if (answered === answers[0]) {
           return true;
         }
-      }
+      // }
       return false;
     };
 
@@ -82,12 +82,12 @@
       var isCorrect = correct(checkedAnswer);
       if (isCorrect) {
         $wrapper.addClass('h5p-correct');
-        $input.attr('disabled', true)
+        $select.attr('disabled', true)
           .attr('aria-label', inputLabel + '. ' + l10n.answeredCorrectly);
       }
       else {
         $wrapper.addClass('h5p-wrong');
-        $input.attr('aria-label', inputLabel + '. ' + l10n.answeredIncorrectly);
+        $select.attr('aria-label', inputLabel + '. ' + l10n.answeredIncorrectly);
       }
     };
 
@@ -113,7 +113,7 @@
      * @param  {boolean}   enabled True if input should be enabled, otherwise false
      */
     this.toggleInput = function (enabled) {
-      $input.attr('disabled', !enabled);
+      $select.attr('disabled', !enabled);
     };
 
     /**
@@ -127,15 +127,15 @@
       $('<span>', {
         'aria-hidden': true,
         'class': 'h5p-correct-answer',
-        text: answer,
+        text: answers[0],
         insertAfter: $wrapper
       });
-      $input.attr('disabled', true);
+      $select.attr('disabled', true);
       var ariaLabel = inputLabel + '. ' +
         l10n.solutionLabel + ' ' + answer + '. ' +
         l10n.answeredIncorrectly;
 
-      $input.attr('aria-label', ariaLabel);
+      $select.attr('aria-label', ariaLabel);
     };
 
     /**
@@ -155,7 +155,7 @@
      * @param {number} totalCloze Total amount of clozes in blanks
      */
     this.setInput = function ($element, afterCheck, afterFocus, clozeIndex, totalCloze) {
-      $input = $element;
+      $select = $element;
       $wrapper = $element.parent();
       inputLabel = inputLabel.replace('@num', (clozeIndex + 1))
         .replace('@total', totalCloze);
@@ -169,10 +169,10 @@
         inputLabel += '. ' + l10n.inputHasTipLabel;
       }
 
-      $input.attr('aria-label', inputLabel);
+      $select.attr('aria-label', inputLabel);
 
       if (afterCheck !== undefined) {
-        $input.blur(function () {
+        $select.blur(function () {
           if (self.filledOut()) {
             // Check answers
             if (!behaviour.enableRetry) {
@@ -183,17 +183,17 @@
           }
         });
       }
-      $input.keyup(function () {
-        if (checkedAnswer !== null && checkedAnswer !== self.getUserAnswer()) {
-          // The Answer has changed since last check
-          checkedAnswer = null;
-          $wrapper.removeClass('h5p-wrong');
-          $input.attr('aria-label', inputLabel);
-          if (afterFocus !== undefined) {
-            afterFocus();
-          }
-        }
-      });
+      // $input.keyup(function () {
+      //   if (checkedAnswer !== null && checkedAnswer !== self.getUserAnswer()) {
+      //     // The Answer has changed since last check
+      //     checkedAnswer = null;
+      //     $wrapper.removeClass('h5p-wrong');
+      //     $input.attr('aria-label', inputLabel);
+      //     if (afterFocus !== undefined) {
+      //       afterFocus();
+      //     }
+      //   }
+      // });
     };
 
     /**
@@ -201,30 +201,49 @@
      */
     this.toString = function () {
       var extra = defaultUserAnswer ? ' value="' + defaultUserAnswer + '"' : '';
-      var result = '<span class="h5p-input-wrapper"><input type="text" class="h5p-text-input" autocomplete="off" autocapitalize="off" spellcheck="false"' + extra + '></span>';
+      var options = ''; 
+      if (answers){
+        var answersCopy = [...answers];
+        answersCopy = this.shuffle(answersCopy);
+        options = answersCopy.map(a => `<option value="${a}">${a}</option>`); 
+      }
+      var result = '<span class="h5p-input-wrapper"><select class="h5p-select" ><option value=""></option>' + options + '</select></span>';
       self.length = result.length;
       return result;
     };
+
+
+    /**
+     * Shuffles array in place. ES6 version
+     * @param {Array} a items An array containing the items.
+     */
+    this.shuffle = function(a) {
+      for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
 
     /**
      * @returns {string} Trimmed answer
      */
     this.getUserAnswer = function () {
-      return H5P.trim($input.val());
+      return H5P.trim($select.val() || '');
     };
 
     /**
      * @param {string} text New input text
      */
     this.setUserInput = function (text) {
-      $input.val(text);
+      $select.val(text);
     };
 
     /**
      * Resets aria label of input field
      */
     this.resetAriaLabel = function () {
-      $input.attr('aria-label', inputLabel);
+      $select.attr('aria-label', inputLabel);
     };
   };
 
