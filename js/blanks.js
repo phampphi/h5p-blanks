@@ -684,7 +684,9 @@ H5P.Blanks = (function ($, Question) {
     definition.extensions = definition.extensions || {};
     definition.extensions[XAPI_CASE_SENSITIVITY] = this.params.behaviour.caseSensitive;
     definition.extensions[XAPI_ALTERNATIVE_EXTENSION] = clozeSolutions;
-
+    // Add title for h5p-php-reporting
+    definition.extensions.title = this.getTitle();
+    console.log(definition);
     return definition;
   };
 
